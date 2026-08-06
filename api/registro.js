@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-// ⚠️ REEMPLAZA CON TUS DATOS REALES DE SUPABASE
+
 const SUPABASE_URL = 'https://tdxxtuhlaimmmcesclat.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkeHh0dWhsYWltbW1jZXNjbGF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNjM2NDksImV4cCI6MjA5NTczOTY0OX0.lgoLL29EEOeTpQAY_enkGmwS1t5S1Ans3Lnip0QRfF8';
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default async function handler(req, res) {
@@ -15,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    return res.status(200).json({ 
+    return res.status(200).json({
       mensaje: 'API de LAGOS CIRCULAR funcionando correctamente',
       hora: new Date().toISOString()
     });
@@ -24,27 +23,29 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const { nombre, email, institucion } = req.body;
-      
-      const { data, error } = await supabase
+
+      // Nota: sin .select() al final. El rol "anon" solo tiene permiso de INSERT
+      // (política insertar_anon), no de SELECT — pedir la fila de vuelta con
+      // .select() requiere permiso de lectura y provocaba el error de RLS.
+      const { error } = await supabase
         .from('interesados')
-        .insert([{ nombre, email, institucion }])
+        .insert([{ nombre, email, institucion }]);
 
       if (error) {
-        return res.status(500).json({ 
-          success: false, 
-          error: 'Error al guardar en la base de datos: ' + error.message 
+        return res.status(500).json({
+          success: false,
+          error: 'Error al guardar en la base de datos: ' + error.message
         });
       }
 
-      return res.status(200).json({ 
-        success: true, 
-        mensaje: 'Registro exitoso. Datos guardados en Supabase.',
-        datos: data
+      return res.status(200).json({
+        success: true,
+        mensaje: 'Registro exitoso. Datos guardados en Supabase.'
       });
     } catch (error) {
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Error interno del servidor: ' + error.message 
+      return res.status(500).json({
+        success: false,
+        error: 'Error interno del servidor: ' + error.message
       });
     }
   }
