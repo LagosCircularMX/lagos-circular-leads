@@ -28,7 +28,6 @@ export default async function handler(req, res) {
       const { data, error } = await supabase
         .from('interesados')
         .insert([{ nombre, email, institucion }])
-        .select();
 
       if (error) {
         return res.status(500).json({ 
